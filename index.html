@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SmartBiz AI</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<meta name="theme-color" content="#12223A">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#F6F7FB;--card:#fff;--ink:#12223A;--mute:#5B6980;--line:#E1E5EE;--acc:#F5A623;--accink:#12223A;--ok:#1FA67A;--bad:#D64545}
+:root[data-theme=dark]{--bg:#0D1626;--card:#162238;--ink:#EEF2FA;--mute:#9AA8C0;--line:#26344F;--acc:#F5A623;--accink:#12223A}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Hind Siliguri",system-ui,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:72px;line-height:1.5}
+a{color:inherit}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);z-index:5}
+.logo{font-weight:700;font-size:20px;text-decoration:none}.logo b{color:var(--acc)}
+.row{display:flex;gap:8px;align-items:center}
+select,input,textarea{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+header select{width:auto;padding:6px 8px}
+button,.btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:11px 18px;background:var(--acc);color:var(--accink);cursor:pointer;text-decoration:none;display:inline-block;text-align:center}
+.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.ic{padding:7px 11px}
+main{max-width:760px;margin:0 auto;padding:16px}
+h1{font-size:32px;line-height:1.2;margin-bottom:10px}h2{font-size:22px;margin:18px 0 10px}
+p.mute,.mute{color:var(--mute)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.hero{padding:28px 0 12px}.hero .row{margin-top:18px;flex-wrap:wrap}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.bar{height:8px;background:var(--line);border-radius:9px;overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;background:var(--ok)}
+.pill{font-size:13px;padding:2px 10px;border-radius:20px;background:var(--acc);color:var(--accink);font-weight:600}
+.lock{opacity:.6}
+form{display:grid;gap:12px}label{font-size:14px;color:var(--mute);display:grid;gap:4px}
+.err{color:var(--bad);font-size:14px}.okm{color:var(--ok);font-size:14px}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:space-around;background:var(--card);border-top:1px solid var(--line);padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px))}
+nav a{text-decoration:none;font-size:13px;text-align:center;color:var(--mute);padding:4px 10px}nav a.on{color:var(--ink);font-weight:700}
+.price{font-size:28px;font-weight:700}.price small{font-size:14px;font-weight:400;color:var(--mute)}
+ul.f{padding-left:18px;color:var(--mute);font-size:15px}
+</style>
+</head>
+<body>
+<header>
+<a class="logo" href="#/">Smart<b>Biz</b> AI</a>
+<div class="row"><select id="lang"><option value="bn">বাংলা</option><option value="en">English</option><option value="hi">हिन्दी</option></select>
+<button class="ghost ic" id="theme" aria-label="theme">◐</button></div>
+</header>
+<main id="app"></main>
+<nav id="nav" hidden></nav>
+<script>
+const SB_URL="https://ukmbjfdpfhknidysebst.supabase.co";
+const SB_KEY="sb_publishable_CGFdXxqsMBYp97oHeTRT1Q_bqKy-GX4";
+const sb=supabase.createClient(SB_URL,SB_KEY);
+const T={
+bn:{h1:"আপনার ব্যবসার পোস্ট, বিজ্ঞাপন আর হোয়াটসঅ্যাপ উত্তর, এক মিনিটে",sub:"বাংলা, হিন্দি ও ইংরেজিতে। ফ্রি প্ল্যানে প্রতিদিন কয়েকটা ব্যবহার করুন।",start:"ফ্রিতে শুরু করুন",login:"লগইন",signup:"সাইন আপ",email:"ইমেইল",pass:"পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)",name:"আপনার নাম",phone:"ফোন",logout:"লগআউট",home:"হোম",tools:"টুলস",pricing:"প্ল্যান",profile:"প্রোফাইল",hello:"নমস্কার",plan:"বর্তমান প্ল্যান",today:"আজকের ব্যবহার",perday:"প্রতিদিন",unl:"আনলিমিটেড",locked:"আপগ্রেড করলে পাওয়া যাবে",soon:"এই টুল পরের ধাপে চালু হবে",save:"সেভ করুন",saved:"সেভ হয়েছে",month:"/মাস",current:"আপনার প্ল্যান",upgrade:"আপগ্রেড",paysoon:"পেমেন্ট শীঘ্রই চালু হবে",lang:"ভাষা",noacct:"অ্যাকাউন্ট নেই?",haveacct:"অ্যাকাউন্ট আছে?",wait:"অপেক্ষা করুন…",f:{social_post:"সোশ্যাল পোস্ট",whatsapp_reply:"হোয়াটসঅ্যাপ উত্তর",ad_copy:"বিজ্ঞাপনের লেখা",product_desc:"পণ্যের বিবরণ",facebook:"ফেসবুক মার্কেটিং",instagram:"ইন্সটাগ্রাম কনটেন্ট",festival:"উৎসবের মার্কেটিং",business_tools:"অ্যাডভান্সড বিজনেস টুলস"}},
+en:{h1:"Posts, ads and WhatsApp replies for your business, in a minute",sub:"In Bengali, Hindi and English. Start free with a few uses every day.",start:"Start free",login:"Log in",signup:"Sign up",email:"Email",pass:"Password (min 6 characters)",name:"Your name",phone:"Phone",logout:"Log out",home:"Home",tools:"Tools",pricing:"Plans",profile:"Profile",hello:"Hello",plan:"Current plan",today:"Today's usage",perday:"per day",unl:"Unlimited",locked:"Available on a higher plan",soon:"This tool goes live in the next step",save:"Save changes",saved:"Saved",month:"/month",current:"Your plan",upgrade:"Upgrade",paysoon:"Payments are coming soon",lang:"Language",noacct:"No account?",haveacct:"Have an account?",wait:"Please wait…",f:{social_post:"Social media post",whatsapp_reply:"WhatsApp reply",ad_copy:"Ad copy",product_desc:"Product description",facebook:"Facebook marketing",instagram:"Instagram content",festival:"Festival marketing",business_tools:"Advanced business tools"}},
+hi:{h1:"आपके बिज़नेस के पोस्ट, विज्ञापन और व्हाट्सऐप जवाब, एक मिनट में",sub:"बंगाली, हिंदी और अंग्रेज़ी में। फ्री प्लान में रोज़ कुछ बार इस्तेमाल करें।",start:"फ्री शुरू करें",login:"लॉगिन",signup:"साइन अप",email:"ईमेल",pass:"पासवर्ड (कम से कम 6 अक्षर)",name:"आपका नाम",phone:"फ़ोन",logout:"लॉगआउट",home:"होम",tools:"टूल्स",pricing:"प्लान",profile:"प्रोफ़ाइल",hello:"नमस्ते",plan:"मौजूदा प्लान",today:"आज का उपयोग",perday:"प्रति दिन",unl:"अनलिमिटेड",locked:"अपग्रेड करने पर मिलेगा",soon:"यह टूल अगले चरण में चालू होगा",save:"सेव करें",saved:"सेव हो गया",month:"/माह",current:"आपका प्लान",upgrade:"अपग्रेड",paysoon:"पेमेंट जल्द शुरू होगा",lang:"भाषा",noacct:"खाता नहीं है?",haveacct:"खाता है?",wait:"प्रतीक्षा करें…",f:{social_post:"सोशल मीडिया पोस्ट",whatsapp_reply:"व्हाट्सऐप जवाब",ad_copy:"विज्ञापन कॉपी",product_desc:"प्रोडक्ट विवरण",facebook:"फेसबुक मार्केटिंग",instagram:"इंस्टाग्राम कंटेंट",festival:"त्योहार मार्केटिंग",business_tools:"एडवांस्ड बिज़नेस टूल्स"}}};
+const FEATS=["social_post","whatsapp_reply","ad_copy","product_desc","facebook","instagram","festival","business_tools"];
+let lang=localStorage.getItem("lang")||"bn",session=null,profile=null,plans=[],limits=[],usage={};
+const t=k=>T[lang][k],ft=k=>T[lang].f[k];
+const $=s=>document.querySelector(s),app=$("#app");
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function setTheme(x){document.documentElement.dataset.theme=x;localStorage.setItem("theme",x)}
+setTheme(localStorage.getItem("theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light"));
+$("#theme").onclick=()=>setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");
+$("#lang").value=lang;
+$("#lang").onchange=e=>{lang=e.target.value;localStorage.setItem("lang",lang);document.documentElement.lang=lang;route()};
+try{navigator.serviceWorker&&navigator.serviceWorker.register("sw.js")}catch(e){}
+
+async function loadData(){
+ const [p,l]=await Promise.all([sb.from("plans").select("*").eq("active",true).order("sort_order"),sb.from("plan_limits").select("*")]);
+ plans=p.data||[];limits=l.data||[];
+ if(session){
+  const pr=await sb.from("profiles").select("*").eq("id",session.user.id).single();profile=pr.data;
+  const d=new Date(),ist=new Date(d.getTime()+19800000);ist.setUTCHours(0,0,0,0);
+  const start=new Date(ist.getTime()-19800000).toISOString();
+  const u=await sb.from("usage_logs").select("feature").gte("created_at",start);
+  usage={};(u.data||[]).forEach(r=>usage[r.feature]=(usage[r.feature]||0)+1);
+ }
+}
+const lim=(plan,f)=>{const r=limits.find(x=>x.plan_id===plan&&x.feature===f);return r?r.daily_limit:0};
+const effPlan=()=>{if(!profile)return"free";return profile.plan_id!=="free"&&profile.plan_expires_at&&new Date(profile.plan_expires_at)<new Date()?"free":profile.plan_id};
+
+function nav(r){const n=$("#nav");n.hidden=!session;if(!session)return;
+ n.innerHTML=[["/dash","home"],["/tools","tools"],["/pricing","pricing"],["/profile","profile"]].map(([h,k])=>`<a href="#${h}" class="${r===h?"on":""}">${t(k)}</a>`).join("")}
+
+function landing(){app.innerHTML=`<section class="hero"><h1>${t("h1")}</h1><p class="mute">${t("sub")}</p>
+<div class="row"><a class="btn" href="#/signup">${t("start")}</a><a class="btn ghost" href="#/login">${t("login")}</a></div></section>
+<div class="grid" style="margin-top:20px">${FEATS.slice(0,4).map(f=>`<div class="card"><b>${ft(f)}</b></div>`).join("")}</div>${priceCards(false)}`}
+
+function authView(mode){const su=mode==="signup";
+app.innerHTML=`<div class="card"><h2 style="margin-top:0">${su?t("signup"):t("login")}</h2><form id="af">
+${su?`<label>${t("name")}<input id="fn" required></label>`:""}
+<label>${t("email")}<input id="em" type="email" required autocomplete="email"></label>
+<label>${t("pass")}<input id="pw" type="password" minlength="6" required autocomplete="${su?"new-password":"current-password"}"></label>
+<div class="err" id="msg"></div><button>${su?t("signup"):t("login")}</button></form>
+<p class="mute" style="margin-top:12px">${su?t("haveacct"):t("noacct")} <a href="#/${su?"login":"signup"}">${su?t("login"):t("signup")}</a></p></div>`;
+$("#af").onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector("button"),m=$("#msg");b.disabled=true;m.textContent=t("wait");
+ const email=$("#em").value.trim(),password=$("#pw").value;
+ const r=su?await sb.auth.signUp({email,password,options:{data:{full_name:$("#fn").value.trim()}}}):await sb.auth.signInWithPassword({email,password});
+ b.disabled=false;
+ if(r.error){m.textContent=r.error.message;return}
+ if(su&&!r.data.session){m.className="okm";m.textContent="Check your email to confirm, then log in.";return}
+ location.hash="#/dash"}}
+
+function usageRow(f,plan){const l=lim(plan,f),u=usage[f]||0;
+ if(!l)return`<div class="lock"><div class="row" style="justify-content:space-between"><span>${ft(f)}</span><span class="mute">🔒</span></div></div>`;
+ const pct=l<0?0:Math.min(100,u/l*100);
+ return`<div><div class="row" style="justify-content:space-between"><span>${ft(f)}</span><span class="mute">${u} / ${l<0?t("unl"):l}</span></div><div class="bar"><i style="width:${pct}%"></i></div></div>`}
+
+function dash(){const p=effPlan(),pn=(plans.find(x=>x.id===p)||{}).name||p;
+app.innerHTML=`<h2 style="margin-top:0">${t("hello")}, ${esc(profile?.full_name||session.user.email)}</h2>
+<div class="card row" style="justify-content:space-between"><span class="mute">${t("plan")}</span><span class="pill">${esc(pn)}</span></div>
+<div class="card"><b>${t("today")}</b><div style="display:grid;gap:14px;margin-top:12px">${FEATS.map(f=>usageRow(f,p)).join("")}</div></div>`}
+
+function tools(){const p=effPlan();
+app.innerHTML=`<h2 style="margin-top:0">${t("tools")}</h2><div class="grid">${FEATS.map(f=>{const l=lim(p,f);
+return`<div class="card ${l?"":"lock"}"><b>${ft(f)}</b><p class="mute" style="font-size:14px;margin-top:4px">${l?t("soon"):t("locked")}</p></div>`}).join("")}</div>`}
+
+function priceCards(cur){return`<h2>${t("pricing")}</h2><div class="grid">${plans.map(pl=>{
+const fs=FEATS.filter(f=>lim(pl.id,f)!==0).map(f=>{const l=lim(pl.id,f);return`<li>${ft(f)}: ${l<0?t("unl"):l+" "+t("perday")}</li>`}).join("");
+const mine=cur&&effPlan()===pl.id;
+return`<div class="card"><b>${esc(pl.name)}</b><div class="price">₹${pl.price_inr}<small>${t("month")}</small></div><ul class="f">${fs}</ul>
+<div style="margin-top:12px">${mine?`<span class="pill">${t("current")}</span>`:pl.price_inr>0?`<button class="ghost" onclick="alert('${t("paysoon")}')">${t("upgrade")}</button>`:""}</div></div>`}).join("")}</div>`}
+
+function pricing(){app.innerHTML=priceCards(true).replace("<h2>","<h2 style='margin-top:0'>")}
+
+function prof(){app.innerHTML=`<h2 style="margin-top:0">${t("profile")}</h2><div class="card"><form id="pf">
+<label>${t("email")}<input value="${esc(session.user.email)}" disabled></label>
+<label>${t("name")}<input id="pn" value="${esc(profile?.full_name)}"></label>
+<label>${t("phone")}<input id="pp" type="tel" value="${esc(profile?.phone)}"></label>
+<div class="okm" id="pm"></div><button>${t("save")}</button></form></div>
+<button class="ghost" id="lo">${t("logout")}</button>`;
+$("#pf").onsubmit=async e=>{e.preventDefault();const r=await sb.from("profiles").update({full_name:$("#pn").value.trim(),phone:$("#pp").value.trim(),language:lang}).eq("id",session.user.id);
+ $("#pm").textContent=r.error?r.error.message:t("saved");if(!r.error)profile.full_name=$("#pn").value.trim()};
+$("#lo").onclick=async()=>{await sb.auth.signOut();location.hash="#/"}}
+
+async function route(){
+ const r=(location.hash.slice(1)||"/");
+ const priv=["/dash","/tools","/pricing","/profile"];
+ if(priv.includes(r)&&!session){location.hash="#/login";return}
+ if((r==="/login"||r==="/signup")&&session){location.hash="#/dash";return}
+ if(session&&r==="/"){location.hash="#/dash";return}
+ if(!plans.length||session)await loadData();
+ nav(r);
+ ({"/":landing,"/login":()=>authView("login"),"/signup":()=>authView("signup"),"/dash":dash,"/tools":tools,"/pricing":pricing,"/profile":prof}[r]||landing)();
+}
+window.addEventListener("hashchange",route);
+sb.auth.onAuthStateChange((ev,s)=>{session=s;if(ev==="SIGNED_IN"||ev==="SIGNED_OUT")route()});
+sb.auth.getSession().then(({data})=>{session=data.session;route()});
+</script>
+</body>
+</html>
